@@ -1,10 +1,21 @@
 
-import { createStore } from 'redux'
-import rootReducer from './reducer'
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./slices/auth"
+import carReducer from "./slices/carSlice"
+import carCategoryReducer from "./slices/carCategorySlice"
+import snackbarReducer from "./slices/snackbarSlice"
 
-const store = createStore(
-    rootReducer,
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-);
-
-export default store;
+const reducer = {
+    auth: authReducer,
+    cars: carReducer,
+    categories: carCategoryReducer,
+    snackbar: snackbarReducer
+}
+export default configureStore({
+    reducer: reducer,
+    devTools: true,
+    middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
+})

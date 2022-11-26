@@ -1,54 +1,83 @@
-import * as React from "react";
+import React, { useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import LockOpenIcon from '@mui/icons-material/LockOpen';
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import messages from "../../locales/en";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../../redux/slices/auth";
+import { showNotificationMessage } from "../../redux/slices/snackbarSlice";
 
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link
-        color="inherit"
-        href="https://muhammadameen252.github.io/My-Portfolio/"
-      >
-        Muhammad Ameen
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+export default function Signup(props) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const userToken = currentUser?.token;
+  const NAME_MIN_LENGTH = 3;
+  const [signupData, setSignupData] = useState({
+    name: "",
+    email: "",
+  });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+  });
+  function validateEmail(inputText) {
+    const mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return inputText.match(mailformat);
+  }
 
-export default function Signup() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+  const handleSubmit = () => {
+    const { name, email } = signupData;
+    if (!name && !email)
+      return setErrors({
+        ...errors,
+        name: messages.nameRequired,
+        email: messages.emailRequired,
+      });
+    if (!name) return setErrors({ ...errors, name: messages.nameRequired });
+    if (!email) return setErrors({ ...errors, email: messages.emailRequired });
+    if (!validateEmail(email))
+      return setErrors({ ...errors, email: messages.emailInvalid });
+    if (name.length < NAME_MIN_LENGTH)
+      return setErrors({
+        ...errors,
+        name: messages.nameMinLength.replace("{0}", NAME_MIN_LENGTH),
+      });
+
+    dispatch(register(signupData))
+      .unwrap()
+      .then((res) => {
+        if (!res?.data) {
+          return dispatch(showNotificationMessage({message:  messages.invlidRes, type: "error"}));
+        }
+        console.log(
+          "email: ",
+          res.data.user.email,
+          "password: ",
+          res.data.password
+        );
+        dispatch(showNotificationMessage({message:  messages.sucessSignup, type: "success"}));
+        navigate("/login");
+      })
+      .catch((error) => {
+        return dispatch(showNotificationMessage({message:  error, type: "error"}));
+      });
   };
 
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
+      {userToken && <Navigate to="/" />}
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 11,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -60,49 +89,59 @@ export default function Signup() {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                autoComplete="given-name"
-                name="firstName"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="family-name"
-              />
-            </Grid>
+        <Box sx={{ mt: 3 }}>
+          <Grid item xs={12}>
+            <TextField
+              required
+              fullWidth
+              id="name"
+              label="Name"
+              value={signupData.name}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSignupData({ ...signupData, name: val });
+                if (val.trim() && errors.name === messages.nameRequired) {
+                  setErrors({ ...errors, name: "" });
+                }
+                if (
+                  val.trim().length >= NAME_MIN_LENGTH &&
+                  errors.name ===
+                    messages.nameMinLength.replace("{0}", NAME_MIN_LENGTH)
+                ) {
+                  setErrors({ ...errors, name: "" });
+                }
+              }}
+              error={errors.name}
+              helperText={errors.name}
+              name="name"
+              autoComplete="family-name"
+            />
           </Grid>
           <TextField
             margin="normal"
             required
             fullWidth
             id="email"
+            value={signupData.email}
+            error={errors.email}
+            helperText={errors.email}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSignupData({ ...signupData, email: val });
+              if (val.trim() && errors.email === messages.emailRequired) {
+                setErrors({ ...errors, email: "" });
+              }
+              if (
+                validateEmail(val.trim()) &&
+                errors.email === messages.emailInvalid
+              ) {
+                setErrors({ ...errors, email: "" });
+              }
+            }}
             label="Email Address"
             name="email"
             autoComplete="email"
             autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
@@ -113,12 +152,12 @@ export default function Signup() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            onClick={handleSubmit}
           >
             Sign Up
           </Button>
         </Box>
       </Box>
-      <Copyright sx={{ mt: 8, mb: 4 }} />
     </Container>
   );
 }
