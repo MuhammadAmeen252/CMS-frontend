@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -12,47 +11,58 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import TimeToLeaveIcon from '@mui/icons-material/TimeToLeave';
 import CategoryIcon from '@mui/icons-material/Category';
 import AddIcon from '@mui/icons-material/Add';
-import UpdateIcon from '@mui/icons-material/Update';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import { useTheme } from "@mui/material/styles";
+import { DashboardSharp } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 260;
 
 export default function MyDrawer() {
-    const theme = useTheme()
+  const navigate = useNavigate()
   const [menuItems, setMenuItems] = useState([
     {
-      name: "Categories",
+      name: "Dashboard",
       path: "/",
+      icon: <DashboardSharp />,
       subMenu: [
-        { name: "Add category", path: "/", icon: <AddIcon /> },
-        { name: "Update category", path: "/", icon: <UpdateIcon /> },
-        { name: "Delete category", path: "/", icon: <DeleteSweepIcon /> },
-        { name: "View categories", path: "/", icon:<ViewListIcon /> },
+      ],
+      isOpen: false,
+    },
+    {
+      name: "Categories",
+      path: null,
+      subMenu: [
+        { name: "Add a category", path: "/addCarCategory", icon: <AddIcon /> },
+        { name: "View categories", path: "/viewCarCategories", icon:<ViewListIcon /> },
       ],
       isOpen: false,
       icon: <CategoryIcon />
     },
     {
-      name: "cars",
-      path: "/",
+      name: "Cars",
+      path: null,
       subMenu: [
-        { name: "Add car", path: "/", icon: <AddIcon /> },
-        { name: "Update car", path: "/", icon: <UpdateIcon /> },
-        { name: "Delete car", path: "/" , icon: <DeleteSweepIcon /> },
-        { name: "View cars", path: "/", icon:<ViewListIcon /> },
+        { name: "Add a car", path: "/addCar", icon: <AddIcon /> },
+        { name: "View cars", path: "/viewCars", icon:<ViewListIcon /> },
       ],
       isOpen: false,
       icon: <TimeToLeaveIcon />
-      
     },
   ])
-  const onClickListItem = (index) => {
+  const onClickListMenuItem = (index) => {
     const items = menuItems
+    const item = items[index]
+    if(item.path){
+      navigate(item.path)
+    }
     items[index].isOpen = !items[index].isOpen
-    console.log("menu items", items)
     setMenuItems([...items])
+  }
+  const onClickListSubMenuItem = (itemIndex, subItemIndex) => {
+    const subMenuItem = menuItems[itemIndex].subMenu[subItemIndex]
+    if(subMenuItem.path){
+      navigate(subMenuItem.path)
+    }
   }
   return (
     <Drawer
@@ -70,20 +80,20 @@ export default function MyDrawer() {
     >
       <List>
         {menuItems.map((item, index) => (
-          <div>
-            <ListItem key={item.name} disablePadding>
-              <ListItemButton onClick={()=>onClickListItem(index)}>
+          <div key={index + item.name}>
+            <ListItem key={index + item.name} disablePadding>
+              <ListItemButton onClick={()=>onClickListMenuItem(index)}>
                 <ListItemIcon>
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText primary={item.name} />
-                {item.isOpen ? <ExpandLess /> : <ExpandMore />}
+                <ListItemText primary={index+1 + ". " +item.name} />
+                {item.subMenu.length > 0 && (item.isOpen ? <ExpandLess /> : <ExpandMore />)}
               </ListItemButton>
             </ListItem>
             <Collapse in={item.isOpen} timeout="auto" unmountOnExit>
-              {item.subMenu.map((subItem) => (
-                <List component="div" disablePadding>
-                  <ListItemButton sx={{ pl: 4 }}>
+              {item.subMenu.map((subItem, i) => (
+                <List key={i + subItem.name} component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }} onClick={()=>onClickListSubMenuItem(index, i)}>
                     <ListItemIcon>{subItem.icon}</ListItemIcon>
                     <ListItemText primary={subItem.name} />
                   </ListItemButton>

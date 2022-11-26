@@ -1,53 +1,92 @@
 import Styled from "./styles";
-import * as React from "react";
-import { DataGrid } from "@mui/x-data-grid";
-const columns = [
-  { field: "id", headerName: "ID", width: 70 },
-  { field: "firstName", headerName: "First name", width: 130 },
-  { field: "lastName", headerName: "Last name", width: 130 },
-  {
-    field: "age",
-    headerName: "Age",
-    type: "number",
-    width: 90,
-  },
-  {
-    field: "fullName",
-    headerName: "Full name",
-    description: "This column has a value getter and is not sortable.",
-    sortable: false,
-    width: 160,
-    valueGetter: (params) =>
-      `${params.row.firstName || ""} ${params.row.lastName || ""}`,
-  },
-];
+import React, { useEffect } from "react";
+import { Box, Grid, Typography } from "@mui/material";
+import AirportShuttleIcon from "@mui/icons-material/AirportShuttle";
+import { CategoryOutlined, NoCrash, SupervisedUserCircle } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import { veiwDashboard } from "../../redux/slices/carSlice";
+import messages from "../../locales/en";
+import { useState } from "react";
+import Cars from "../cars/component";
+import { showNotificationMessage } from "../../redux/slices/snackbarSlice";
+const Dashboard = (props) => {
+  const dispatch = useDispatch();
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const userToken = currentUser?.token
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    dispatch(veiwDashboard(userToken))
+      .unwrap()
+      .then((res) => {
+        if (!res) {
+          return dispatch(showNotificationMessage({message: messages.invlidRes, type: "error"}));
+        }
+        setStats(res)
+      })
+      .catch((error) => {
+        dispatch(showNotificationMessage({message: messages.invlidRes, type: "error"}));
+      });
+  }, []);
 
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-];
-const Login = () => {
   return (
-    <div>
-      Dashboard
-      <div style={{ height: 400, width: "100%" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
-          checkboxSelection
-        />
-      </div>
-    </div>
+    <Grid>
+      <Grid container sx={{ justifyContent: "space-between", mb:2 }}>
+        <Styled.CountBox item xs={10} md={2.5}>
+          <Styled.CountBoxContent>
+            <Box flex={"column"}>
+              <Typography variant="p" fontSize={11}>
+                TOTAL CARS
+              </Typography>
+              <Typography>{stats?.carsCount}</Typography>
+            </Box>
+            <Box mt={1}>
+              <AirportShuttleIcon fontSize="large" />
+            </Box>
+          </Styled.CountBoxContent>
+        </Styled.CountBox>
+        <Styled.CountBox item xs={10} md={2.5}>
+          <Styled.CountBoxContent>
+            <Box flex={"column"}>
+              <Typography variant="p" fontSize={11}>
+                TOTAL CATEGORIES
+              </Typography>
+              <Typography>{stats?.carsCategoriesCount}</Typography>
+            </Box>
+            <Box mt={1}>
+              <CategoryOutlined fontSize="large" />
+            </Box>
+          </Styled.CountBoxContent>
+        </Styled.CountBox>
+        <Styled.CountBox item xs={10} md={2.5}>
+          <Styled.CountBoxContent>
+            <Box flex={"column"}>
+              <Typography variant="p" fontSize={11}>
+                CARS ADDED TODAY
+              </Typography>
+              <Typography>{stats?.todayAddedCarsCount}</Typography>
+            </Box>
+            <Box mt={1}>
+              <NoCrash fontSize="large" />
+            </Box>
+          </Styled.CountBoxContent>
+        </Styled.CountBox>
+        <Styled.CountBox item xs={10} md={2.5}>
+          <Styled.CountBoxContent>
+            <Box flex={"column"}>
+              <Typography variant="p" fontSize={11}>
+                TOTAL USERS
+              </Typography>
+              <Typography>{stats?.usersCount}</Typography>
+            </Box>
+            <Box mt={1}>
+              <SupervisedUserCircle fontSize="large" />
+            </Box>
+          </Styled.CountBoxContent>
+        </Styled.CountBox>
+      </Grid>
+      <Cars />
+    </Grid>
   );
 };
 
-export default Login;
+export default Dashboard;
