@@ -15,7 +15,7 @@ const messages = {
   carAdded:"Car added successfully.",
   categoryAdded:"Category added successfully.",
   modelGreaterError:"Car manufacturing year cannot be greater than registration year",
-  emptyFieldError: "Please fill this field. ",
+  emptyFieldError: "Please fill this field.",
   categoryNameLength: "Name must be between {0} to {1} characters long",
   editedCarMsg: "All changes of car are saved successfully.",
   editedCategoryMsg: "All changes of category are saved successfully."
