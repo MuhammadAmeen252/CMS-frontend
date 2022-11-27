@@ -73,7 +73,6 @@ export default function CarCategoryForm(props) {
           })
         );
         const category = res?.data?.carCategory;
-        console.log("added category", category)
         dispatch(setCategories([...categories, category]));
         clearForm()
       })
@@ -105,10 +104,8 @@ export default function CarCategoryForm(props) {
           })
         );
         const category = res?.data?.category;
-        console.log("category", category)
         let categoriesList = categories;
         categoriesList = categoriesList.map((x) => (x._id === category._id ? category : x));
-        console.log("category list", categoriesList)
         dispatch(setCategories([...categoriesList]));
       })
       .catch((error) => {
@@ -120,7 +117,7 @@ export default function CarCategoryForm(props) {
 
   const handleCategoryDetailsChange = (item) => {
     setCategoryDetails({ ...categoryDetails, ...item });
-    console.log("conditos", item.name, errors.name);
+
     if (
       item.name &&
       errors.name &&

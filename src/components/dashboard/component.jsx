@@ -2,7 +2,11 @@ import Styled from "./styles";
 import React, { useEffect } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import AirportShuttleIcon from "@mui/icons-material/AirportShuttle";
-import { CategoryOutlined, NoCrash, SupervisedUserCircle } from "@mui/icons-material";
+import {
+  CategoryOutlined,
+  NoCrash,
+  SupervisedUserCircle,
+} from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { veiwDashboard } from "../../redux/slices/carSlice";
 import messages from "../../locales/en";
@@ -12,32 +16,51 @@ import { showNotificationMessage } from "../../redux/slices/snackbarSlice";
 const Dashboard = (props) => {
   const dispatch = useDispatch();
   const { user: currentUser } = useSelector((state) => state.auth);
-  const userToken = currentUser?.token
+  const { cars } = useSelector((state) => state.cars);
+  const userToken = currentUser?.token;
   const [stats, setStats] = useState(null);
   useEffect(() => {
     dispatch(veiwDashboard(userToken))
       .unwrap()
       .then((res) => {
         if (!res) {
-          return dispatch(showNotificationMessage({message: messages.invlidRes, type: "error"}));
+          return dispatch(
+            showNotificationMessage({
+              message: messages.invlidRes,
+              type: "error",
+            })
+          );
         }
-        setStats(res)
+        setStats(res);
       })
       .catch((error) => {
-        dispatch(showNotificationMessage({message: messages.invlidRes, type: "error"}));
+        dispatch(
+          showNotificationMessage({
+            message: messages.invlidRes,
+            type: "error",
+          })
+        );
       });
   }, []);
 
+  const getCarsAddedToday = () => {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    const carsToday = cars.filter(
+      (car) => car.createdAt.split("T")[0] === today
+    );
+    return carsToday?.length || 0;
+  };
   return (
     <Grid>
-      <Grid container sx={{ justifyContent: "space-between", mb:2 }}>
+      <Grid container sx={{ justifyContent: "space-between", mb: 2 }}>
         <Styled.CountBox item xs={10} md={2.5}>
           <Styled.CountBoxContent>
             <Box flex={"column"}>
               <Typography variant="p" fontSize={11}>
                 TOTAL CARS
               </Typography>
-              <Typography>{stats?.carsCount}</Typography>
+              <Typography>{cars?.length}</Typography>
             </Box>
             <Box mt={1}>
               <AirportShuttleIcon fontSize="large" />
@@ -63,7 +86,7 @@ const Dashboard = (props) => {
               <Typography variant="p" fontSize={11}>
                 CARS ADDED TODAY
               </Typography>
-              <Typography>{stats?.todayAddedCarsCount}</Typography>
+              <Typography>{getCarsAddedToday()}</Typography>
             </Box>
             <Box mt={1}>
               <NoCrash fontSize="large" />

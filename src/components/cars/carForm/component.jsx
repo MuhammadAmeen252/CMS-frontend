@@ -150,7 +150,6 @@ export default function AddEditCar(props) {
         const car = res?.data?.car;
         let carsList = cars;
         carsList = carsList.map((x) => (x._id === car._id ? car : x));
-        console.log("carsList", carsList);
         dispatch(setCars([...carsList]));
       })
       .catch((error) => {

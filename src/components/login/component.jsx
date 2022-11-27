@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import messages from "../../locales/en";
@@ -15,12 +16,13 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/slices/auth";
 import { showNotificationMessage } from "../../redux/slices/snackbarSlice";
+import { Login } from "@mui/icons-material";
 
 export default function SignIn(props) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user: currentUser } = useSelector((state) => state.auth);
-  const userToken = currentUser?.token
+  const userToken = currentUser?.token;
   const PASSWORD_MIN_LENGTH = 7;
   const [userInput, setUserInput] = useState({
     email: "",
@@ -30,6 +32,7 @@ export default function SignIn(props) {
     emailError: "",
     passwordError: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
   function validateEmail(inputText) {
     const mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return inputText.match(mailformat);
@@ -56,17 +59,32 @@ export default function SignIn(props) {
           PASSWORD_MIN_LENGTH
         ),
       });
+    setIsLoading(true);
     dispatch(login(userInput))
       .unwrap()
       .then((res) => {
         if (!res) {
-          return dispatch(showNotificationMessage({message:  messages.invlidRes, type: "error"}));
+          return dispatch(
+            showNotificationMessage({
+              message: messages.invlidRes,
+              type: "error",
+            })
+          );
         }
-        dispatch(showNotificationMessage({message:  messages.successLogin, type: "success"}));
+        dispatch(
+          showNotificationMessage({
+            message: messages.successLogin,
+            type: "success",
+          })
+        );
+        setIsLoading(false)
         navigate("/");
       })
       .catch((error) => {
-        return dispatch(showNotificationMessage({message: error, type: "error"}));
+        setIsLoading(false)
+        return dispatch(
+          showNotificationMessage({ message: error, type: "error" })
+        );
       });
   };
 
@@ -148,22 +166,22 @@ export default function SignIn(props) {
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            onClick={handleSubmit}
-          >
-            Sign In
-          </Button>
+          <LoadingButton
+          color="primary"
+          fullWidth
+          onClick={handleSubmit}
+          loading={isLoading}
+          loadingPosition="start"
+          startIcon={<Login />}
+          sx={{ mt: 3, mb: 2 }}
+          variant="contained"
+        >
+          Sign In
+        </LoadingButton>
           <Grid container>
             <Grid item xs>
               <Link to="#" style={{ textDecoration: "none" }}>
-                <Typography
-                  variant="body2"
-                  color="primary"
-                >
+                <Typography variant="body2" color="primary">
                   {" "}
                   Forgot password?{" "}
                 </Typography>
@@ -171,10 +189,7 @@ export default function SignIn(props) {
             </Grid>
             <Grid item>
               <Link to="/signup" style={{ textDecoration: "none" }}>
-                <Typography
-                  variant="body2"
-                  color="primary"
-                >
+                <Typography variant="body2" color="primary">
                   {"Don't have an account? Sign Up"}
                 </Typography>
               </Link>
