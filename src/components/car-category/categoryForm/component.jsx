@@ -13,6 +13,7 @@ import {
   addCategory,
   editCategory,
 } from "../../../redux/slices/carCategorySlice";
+import {cleanObjectValues} from "../../service"
 
 export default function CarCategoryForm(props) {
   const MIN_NAME_LENGTH = 3;
@@ -54,7 +55,7 @@ export default function CarCategoryForm(props) {
   };
   const handleAddCategory = () => {
     if (!isCorrectAllFields()) return false;
-    const payload = { ...categoryDetails };
+    const payload = { ...cleanObjectValues(categoryDetails) };
     dispatch(addCategory({ userToken, payload }))
       .unwrap()
       .then((res) => {
@@ -85,7 +86,7 @@ export default function CarCategoryForm(props) {
 
   const handleEditCategory = () => {
     if (!isCorrectAllFields()) return false;
-    const payload = { ...categoryDetails };
+    const payload = { ...cleanObjectValues(categoryDetails) };
     dispatch(editCategory({ userToken, payload, id: categoryData?._id }))
       .unwrap()
       .then((res) => {

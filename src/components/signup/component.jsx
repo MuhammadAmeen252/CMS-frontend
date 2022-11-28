@@ -14,6 +14,7 @@ import messages from "../../locales/en";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "../../redux/slices/auth";
 import { showNotificationMessage } from "../../redux/slices/snackbarSlice";
+import { cleanObjectValues } from "../service";
 
 export default function Signup(props) {
   const navigate = useNavigate();
@@ -51,8 +52,8 @@ export default function Signup(props) {
         ...errors,
         name: messages.nameMinLength.replace("{0}", NAME_MIN_LENGTH),
       });
-
-    dispatch(register(signupData))
+    const payload = { ...cleanObjectValues(signupData) };
+    dispatch(register(payload))
       .unwrap()
       .then((res) => {
         if (!res?.data) {

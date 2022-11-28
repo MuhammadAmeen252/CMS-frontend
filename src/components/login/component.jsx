@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/slices/auth";
 import { showNotificationMessage } from "../../redux/slices/snackbarSlice";
 import { Login } from "@mui/icons-material";
+import { cleanObjectValues } from "../service";
 
 export default function SignIn(props) {
   const navigate = useNavigate();
@@ -60,7 +61,8 @@ export default function SignIn(props) {
         ),
       });
     setIsLoading(true);
-    dispatch(login(userInput))
+    const payload = { ...cleanObjectValues(userInput) };
+    dispatch(login(payload))
       .unwrap()
       .then((res) => {
         if (!res) {

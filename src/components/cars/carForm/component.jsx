@@ -10,6 +10,7 @@ import { Divider, InputAdornment, MenuItem, Select } from "@mui/material";
 import { getAllCategories } from "../../../redux/slices/carCategorySlice";
 import { showNotificationMessage } from "../../../redux/slices/snackbarSlice";
 import { addCar, editCar, setCars } from "../../../redux/slices/carSlice";
+import { cleanObjectValues } from "../../service";
 
 export default function AddEditCar(props) {
   const dispatch = useDispatch();
@@ -86,7 +87,7 @@ export default function AddEditCar(props) {
     if (!company || !name || !color || !model || !engineNumber || !category) {
       return false;
     }
-    const payload = { ...carDetails };
+    const payload = { ...cleanObjectValues(carDetails) };
     dispatch(addCar({ userToken, payload }))
       .unwrap()
       .then((res) => {
@@ -129,7 +130,7 @@ export default function AddEditCar(props) {
     if (!company || !name || !color || !model || !engineNumber || !category) {
       return false;
     }
-    const payload = { ...carDetails };
+    const payload = { ...cleanObjectValues(carDetails) };
     dispatch(editCar({ userToken, payload, id: carData?._id }))
       .unwrap()
       .then((res) => {
@@ -340,6 +341,7 @@ export default function AddEditCar(props) {
                 fullWidth
                 id="topSpeed"
                 label="Top Speed"
+                type={"number"}
                 value={carDetails?.topSpeed}
                 onChange={(e) => {
                   handleCarDetailsChange({ topSpeed: e.target.value });
